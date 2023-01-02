@@ -14,36 +14,36 @@ Code Server 사용시, GIT ID 를 --local 로 설정해주세요.
 [깃랩 명령어] 레포지토리 복사
 
 # 리모트 레포지토리 클론
-git remote add origin [리모트 레포지토리명] 
-git clone [리모트 레포지토리명]
+- git remote add origin [리모트 레포지토리명] 
+- git clone [리모트 레포지토리명]
 
 # 유저 설정
-git config --local user.email [깃랩 이메일]
-git config --local user.name [깃랩 이름]
+- git config --local user.email [깃랩 이메일]
+- git config --local user.name [깃랩 이름]
 
 #설정 확인
-git config --list
+- git config --list
 
 # 리모트 레포지토리 PUSH
-git commit -am [설명]
-git push origin main
+- git commit -am [설명]
+- git push origin main
 
 
 
 오류 대응 리스트
 
-error: src refspec main does not match any.
+- error: src refspec main does not match any.
 
 로컬 GIT의 레포지토리의 branch 와 리모트레포지토리(깃랩)의 branch 가 달라서 오류 발생
 
 
 # 로컬 레포지토리의 `branch` 확인
-git branch
+- git branch
 
 # 깃랩과 동일한 브랜치 생성(main)
-git branch main
+- git branch main
 # 생성한 브랜치 이동
-git checkout main
+- git checkout main
 
 
 
