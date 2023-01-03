@@ -1,0 +1,49 @@
+docker image 만들고 save
+
+docker image 다운
+
+이미지 생성
+docker commit <컨테이너명> <리포지토리>:<태그>
+ex) docker commit my-ubuntu fdsafd:ubuntu-test
+
+docker images로 확인
+
+docker image 저장
+docker save [옵션] <파일명> [이미지명]
+EX) docker save -o test.tar fdsafd:ubuntu-test
+
+docker load ( tar -> docker image)
+docker load -i tar파일명
+ex) docker load -i test.tar
+
+
+리눅스 python 버전 변경 설정
+어디를 바라보고 있는지 확인
+우선 python 위치 파악
+
+which python
+	ls -al 경로
+	- 심볼릭링크
+	- update-altervatives <link> <name> <path> 순서
+
+	pip3 경로 변경
+	- vi ~/.bashrc
+	- alias pip3 = pip3.8
+	- 그냥 pip3를 pip3.8로 바라 보게 함.
+
+gcp -> 내부 서버로 파일 이동
+- scp 파일이름 계정이름@아이피주소:파일옮길경로
+
+권한 변경
+chown -R js:js folder
+
+
+
+scp postgres-nuri.tar adam@10.10.10.111:/home/adam/test
+scp airflow-nuri.tar adam@10.10.10.111:/home/adam/test
+scp docker-compose.yaml adam@10.10.10.111:/home/adam/test
+scp sen_1 adam@10.10.10.112:/home/adam/sentinel
+docker load -i redis-nuri.tar
+
+
+

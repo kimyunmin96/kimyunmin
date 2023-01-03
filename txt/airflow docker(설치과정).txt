@@ -1,0 +1,113 @@
+=======================
+docker airflow 설치 과정
+=======================
+
+1. 우선 도커와 도커 컴포즈가 환경에 setting 되어 있어야 한다.
+2. docker compose 파일 docker 공식 홈페이지에서 다운  
+	- 사이트 정보
+		- (https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html )
+	- 내려 받기
+		- curl -LfO 'https://airflow.apache.org/docs/apache-airflow/[에어플로우 버전]/docker-compose.yaml'
+		- ex) curl -LfO 'https://airflow.apache.org/docs/apache-airflow/2.4.1/docker-compose.yaml'
+3. 인터넷 환경에서는 docker compose 를 실행 시키면 yaml 파일 안에 있는 이미지들이 다운 받아지면서 실행이 된다. 
+	- yaml 파일 안에는 redis, postgres, airflow 이렇게 이미지를 사용한다.
+
+4. docker-compose.yaml 안에 마운트 시킬 폴더를 미리 생성한다.
+	- yaml 파일에서는 dags, logs, plugins 를 마운트 한다.
+	- mkdir -p ./dags ./logs ./plugins
+5. airflow uid 설정
+	- echo -e "AIRFLOW_UID=$(id -u)" > .env
+
+6. 이제 airflow를 실행 시킬 준비가 끝났다.
+
+7. docker compose
+	- docker compose 는 현재 경로에 docker-compose.yaml 이 있어야 한다.
+	- 먼저 db 초기화를 시켜줘야 한다. 
+		- docker-compose up airflow-init
+		- 실행이 되면서 마지막에 밑에 처럼 뜨면 성공
+				airflow-init_1       | Upgrades done
+				airflow-init_1       | Admin user airflow created
+				airflow-init_1       | 2.4.1
+				start_airflow-init_1 exited with code 0
+	- 그 후 전체 docker compose 실행
+		- docker-compose up -d
+			- -d 명령어는 백그라운드에서 실행하겠다라는 뜻이다.
+			- -d 를 주지 않으면 실행되는 로그들을 같이 볼수 있다. 
+
+- 끝 -
+----------------------------------------------------------------------
+위에 진행 과정은 윈도우 환경에서 실행하는 과정이다.
+airflow 이미지를 자신이 원하는 라이브러리를 나 설정을 추가 하고 싶으면 이미지를 다신 commit 하면 된다.
+밑에 참조
+----------------------------------------------------------------------
+
+=======================================
+airflow docker image 생성
+=======================================
+위에 윈도우 환경에서 docker 를 실행 했으면 밑에 처럼 컨테이너가 뜰 것이다. [컨테이너 이름은 사용자의 이름 지정에 따라 다르다.]
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	CONTAINER ID   IMAGE                  COMMAND                  CREATED          STATUS                    PORTS                              NAMES
+	247ebe6cf87a   apache/airflow:2.4.1   "/usr/bin/dumb-init …"   3 minutes ago    Up 3 minutes (healthy)    8080/tcp                           compose_airflow-worker_1
+	ed9b09fc84b1   apache/airflow:2.4.1   "/usr/bin/dumb-init …"   3 minutes ago    Up 3 minutes (healthy)    8080/tcp                           compose_airflow-scheduler_1
+	7cb1fb603a98   apache/airflow:2.4.1   "/usr/bin/dumb-init …"   3 minutes ago    Up 3 minutes (healthy)    0.0.0.0:8080->8080/tcp             compose_airflow-webserver_1
+	74f3bbe506eb   postgres:13            "docker-entrypoint.s…"   18 minutes ago   Up 17 minutes (healthy)   5432/tcp                           compose_postgres_1
+	0bd6576d23cb   redis:latest           "docker-entrypoint.s…"   10 hours ago     Up 17 minutes (healthy)   0.0.0.0:6379->6379/tcp             compose_redis_1
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+1. 이중에서 compose_airflow-webserver_1 컨테이너에서 접속을 해서 사용자의 기호에 맞게 셋팅을 바꾸면된다.
+	- 접속 명령어 : docker exec -it [컨테이너 이름] /bin/bash
+			ex) docker exec -it compose_airflow-webserver_1 /bin/bash
+
+2. 사용자에 기호에 맞게 컨테이너 환경을 변경하였으면 이미지로 저장이 필요하다.
+	- docker commit <컨테이너명> <리포지토리>:<태그>
+		ex) docker commit compose_airflow-webserver_1 new/airflow:2.4.1
+
+2-1. 저장한 파일을 taz 파일로 다운 받고 싶으면 위에 이미지로 저장을 한 후
+	- docker save [옵션] <파일명> [이미지명]  
+		ex) docker save -o new_airflow.tar new/airflow:2.4.1
+
+3. 사용자가 만든 airflow 이미지로 다시 airflow 띄우기
+	- 이 때 docker compose down을 먼저 실행해서 충돌이 없게 컨테이너를 다 삭제 해준다.
+	- docker-compose.yaml 에서 airflow image를 사용자가 만든 이미지로 변경을 해주면 된다. 밑에 예시
+
+-------------------------------------------------------------------------------------------------------------------------------------
+version: '3'
+x-airflow-common:
+  &airflow-common
+  # In order to add custom dependencies or upgrade provider packages you can use your extended image.
+  # Comment the image line, place your Dockerfile in the directory where you placed the docker-compose.yaml
+  # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
+  
+  image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.4.1}		---------------------------------- 여기를 수정하면 된다.
+  ex) image: new/airflow:2.4.1								---------------------------------- 예시
+  # build: .
+  environment:
+    &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    # For backward compatibility, with Airflow <2.3
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
+    AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'true'
+    AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
+    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./logs:/opt/airflow/logs
+    - ./plugins:/opt/airflow/plugins
+  user: "${AIRFLOW_UID:-50000}:0"
+  depends_on:
+    &airflow-common-depends-on
+    redis:
+      condition: service_healthy
+    postgres:
+      condition: service_healthy
+-------------------------------------------------------------------------------------------------------------------------------------	
+	
+
+4. 변경이 되었으면 다시 'docker airflow 설치 과정' 맨위 7번 부터 시작 하면 된다.
+	
+	

@@ -1,0 +1,24 @@
+https://dydwnsekd.tistory.com/65
+
+airflow veriable
+- airflow 에서 code 중 숨기고 싶은 것들이 있을 때 사용.
+
+사용법
+airflow ui 에서
+1. admin
+2. veriables
+	- key - value 형태임.
+		- key는 call 할 값 val은 숨길 값
+	- key에 입력할 때 api_key 또는 password 라고 해야 val이 ***이렇게 나옴.
+
+ex)
+
+from airflow.models.variable import Variable
+
+a_user = Variable.get("a_user")
+a_password = Variable.get("a_password")
+
+test = f"아이디 = {a_user} 이고 비밀번호는 {a_password} 입니다.}"
+
+
+

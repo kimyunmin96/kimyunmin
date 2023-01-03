@@ -1,0 +1,21 @@
+1. 라이브러리 필요
+	- pip install redis-py-cluster
+
+2. python 라이브러리 사용
+
+import rediscluster
+
+client = rediscluster.RedisCluster(startup_nodes=[dict(host='127.0.0.1, port=7000)], decode_responses=True, skip_full_coverage_check=True)
+
+- 슬롯 확인
+client.cluster('slots')
+client.set or client.get 사용 가능
+* 데이터를 불러오는데 아무 문제 없음. 분산 되어 있는 데이터를 확인 할 수 있다.
+
+
+
+from redis.cluster import RedisCluster as Redis
+from redis.cluster import ClusterNode
+nodes = [ClusterNode('127.0.0.1', 7001), ClusterNode('127.0.0.1', 7002), ClusterNode('127.0.0.1', 7003)]
+
+redis_conn = Redis(startup_nodes=nodes)

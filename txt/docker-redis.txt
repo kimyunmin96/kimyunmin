@@ -1,0 +1,217 @@
+/home/runner/work/redis-stack/redis-stack/build/Linux-ubuntu20.04-x86_64.redis-stack-server/etc/systemd/system
+
+1. redis-cluster 이미지 생성 (search)
+	- docker image build
+		- Dockerfile 생성
+			- FROM redis/redis-stack-server:6.2.2-v5
+			  RUN apt update && apt upgrade -y && apt install -y vim
+		- docker build . 만들이름:태그
+2. redis conf 파일 작업
+	- port 7001
+	  cluster-enabled yes                                   - cluster mode를 위한 설정
+	  cluster-config-file /data/redis/node_7001.conf							- cluster mode를 위한 설정
+	  cluster-node-timeout 5000								- cluster mode를 위한 설정
+	  logfile /data/redis/redis_7001.log					- cluster mode를 위한 설정		로그 파악
+	  # AOF 를 통해 failover 된 레디스 노드 재 시작시 이전 데이터를 다시 로드해 올 수 있습니다.
+	  appendonly yes										- cluster mode를 위한 설정
+	  daemonize no											- redisearch를 위한 설정 docker image 파일의 경로 부터 확인 후 저 파일들이 있는지 확인 후 설정 
+	  loadmodule /opt/redis-stack/lib/redisearch.so			- redisearch를 위한 설정 docker image 파일의 경로 부터 확인 후 저 파일들이 있는지 확인 후 설정
+	  loadmodule /opt/redis-stack/lib/redisgraph.so			- redisearch를 위한 설정 docker image 파일의 경로 부터 확인 후 저 파일들이 있는지 확인 후 설정
+	  loadmodule /opt/redis-stack/lib/redistimeseries.so	- redisearch를 위한 설정 docker image 파일의 경로 부터 확인 후 저 파일들이 있는지 확인 후 설정
+	  loadmodule /opt/redis-stack/lib/rejson.so				- redisearch를 위한 설정 docker image 파일의 경로 부터 확인 후 저 파일들이 있는지 확인 후 설정
+	  loadmodule /opt/redis-stack/lib/redisbloom.so			- redisearch를 위한 설정 docker image 파일의 경로 부터 확인 후 저 파일들이 있는지 확인 후 설정
+	  
+	  protected-mode no						- docker를 외부에서 컨트롤 할 시 저 옵션을 적용하지 않으면 error
+	  bind 0.0.0.0								- 모든 아이피를 허용하겠다는 말
+	  
+	  loglevel verbose
+	  cluster-announce-ip 172.23.167.67			- docker가 올라가는 host 에서 여기서 eth0 의 주소 172.23.167.67	 를 announce ip로 사용.   ex) ip a 명령어 치면 나옴
+	  
+	  maxmemory 5gb				- maxmemory를 5기가만 사용
+	  
+3. 원하는 만큼 conf 파일 사용 - 본 파일에서는 마스터 3개 슬레이브 6 즉, 1:2 로 만들 예정
+	- .conf 파일은 동일하게 만들지만 포트와 경로는 다르게 지정.
+
+4. docker-compose 파일 생성
+
+version: "3"
+services:
+  redis-cluster:
+    image: redis/redis-stack-server:6.2.2-v5
+    container_name: redis-master-1-7001
+    networks:
+      app_net:											----------------- 만든 network 이름
+        ipv4_address: 172.23.0.2						----------------- network ip 고정
+    volumes: # 작성한 설정 파일을 볼륨을 통해 컨테이너에 공유
+      - ./redis_7001.conf:/etc/redis-stack.conf			------------------conf 파일 수정 후 컨테이너 밖에서 컨트롤하기 위해	
+      - ./logs:/data/redis								------------------ log 와 node.conf 관리 하기 위해		각 컨테이너에 위와 같이 적용
+    command: redis-server /etc/redis-stack.conf
+    ports:
+      - 7001:7001					---------- redis port
+      - 17001:17001					---------- redis cluster port
+
+  redis-node-1:
+    image: redis/redis-stack-server:6.2.2-v5
+    container_name: redis-master-2-7002
+    networks:
+      app_net:
+        ipv4_address: 172.23.0.3
+    volumes:
+      - ./redis_7002.conf:/etc/redis-stack.conf
+      - ./logs:/data/redis
+    command: redis-server /etc/redis-stack.conf
+    ports:
+      - 7002:7002
+      - 17002:17002
+
+  redis-node-2:
+    image: redis/redis-stack-server:6.2.2-v5
+    container_name: redis-master-3-7003
+    networks:
+      app_net:
+        ipv4_address: 172.23.0.4
+    volumes:
+      - ./redis_7003.conf:/etc/redis-stack.conf
+      - ./logs:/data/redis
+    command: redis-server /etc/redis-stack.conf
+    ports:
+      - 7003:7003
+      - 17003:17003
+
+  redis-node-3:
+    image: redis/redis-stack-server:6.2.2-v5
+    container_name: redis-slave-1-7004
+    networks:
+      app_net:
+        ipv4_address: 172.23.0.5
+    volumes:
+      - ./redis_7004.conf:/etc/redis-stack.conf
+      - ./logs:/data/redis
+    command: redis-server /etc/redis-stack.conf
+    ports:
+      - 7004:7004
+      - 17004:17004
+
+  redis-node-4:
+    image: redis/redis-stack-server:6.2.2-v5
+    container_name: redis-slave-2-7005
+    networks:
+      app_net:
+        ipv4_address: 172.23.0.6
+    volumes:
+      - ./redis_7005.conf:/etc/redis-stack.conf
+      - ./logs:/data/redis
+    command: redis-server /etc/redis-stack.conf
+    ports:
+      - 7005:7005
+      - 17005:17005
+
+  redis-node-5:
+    image: redis/redis-stack-server:6.2.2-v5
+    container_name: redis-slave-3-7006
+    networks:
+      app_net:
+        ipv4_address: 172.23.0.7
+    volumes:
+      - ./redis_7006.conf:/etc/redis-stack.conf
+      - ./logs:/data/redis
+    command: redis-server /etc/redis-stack.conf
+    ports:
+      - 7006:7006
+      - 17006:17006
+
+  redis-node-6:
+    image: redis/redis-stack-server:6.2.2-v5
+    container_name: redis-slave-4-7007
+    networks:
+      app_net:
+        ipv4_address: 172.23.0.8
+    volumes:
+      - ./redis_7007.conf:/etc/redis-stack.conf
+      - ./logs:/data/redis
+    command: redis-server /etc/redis-stack.conf
+    ports:
+      - 7007:7007
+      - 17007:17007
+
+  redis-node-7:
+    image: redis/redis-stack-server:6.2.2-v5
+    container_name: redis-slave-5-7008
+    networks:
+      app_net:
+        ipv4_address: 172.23.0.9
+    volumes:
+      - ./redis_7008.conf:/etc/redis-stack.conf
+      - ./logs:/data/redis
+    command: redis-server /etc/redis-stack.conf
+    ports:
+      - 7008:7008
+      - 17008:17008
+
+  redis-node-8:
+    image: redis/redis-stack-server:6.2.2-v5
+    container_name: redis-slave-6-7009
+    networks:
+      app_net:
+        ipv4_address: 172.23.0.10
+    volumes:
+      - ./redis_7009.conf:/etc/redis-stack.conf
+      - ./logs:/data/redis
+    command: redis-server /etc/redis-stack.conf
+    ports:
+      - 7009:7009
+      - 17009:17009
+
+  redis-cluster-entry:
+    image: redis/redis-stack-server:6.2.2-v5
+    container_name: redis-cluster-entry
+    networks:
+      app_net:
+        ipv4_address: 172.23.0.11
+		<---------- 클러스터 하기 위한 문법 --------------->
+    command: redis-cli --cluster create 172.23.0.2:7001 172.23.0.3:7002 172.23.0.4:7003 172.23.0.5:7004 172.23.0.6:7005 172.23.0.7:7006 172.23.0.8:7007 172.23.0.9:7008 172.23.0.10:7009 --cluster-yes --cluster-replicas 2
+    depends_on:
+      - redis-cluster
+      - redis-node-1
+      - redis-node-2
+      - redis-node-3
+      - redis-node-4
+      - redis-node-5
+      - redis-node-6
+      - redis-node-7
+      - redis-node-8
+<----- network make ----->
+networks:
+  app_net:
+    ipam:
+      driver: default
+
+      config:
+        - subnet: 172.23.0.0/24
+          gateway: 172.23.0.1
+
+
+5. 현재 경로에서 redis_7001 ~ 9 까지 폴더 생성해서 위에 conf 파일를 각각 포트에 맞게 넣어준다.
+
+
+
+6. 이제 docker-compose up -d 를 하면 끝 
+	- 정상적으로 작동되는지 확인하기 위해 log file 을 확인.
+	- container 접속 후 명령어를 통해 확인 가능.
+
+* 내부망이나 폐쇄망에서 진행 할 시
+	- docker build 로 원하는 이미지 빌드하고 다운
+	- 그 후 설정은 동일하게
+	docker image 저장
+	- docker save [옵션] <파일명> [이미지명]
+	- EX) docker save -o test.tar fdsafd:ubuntu-test
+	docker load ( tar -> docker image)
+	- docker load -i tar파일명
+	- ex) docker load -i test.tar
+	
+redis cluster mode 로 접속 시
+	- redis-cli -p 포트 -c 뒤에 -c를 해줘야 함 이것이 클러스터 모드 로 들어간다는 의미
+	- 명령어
+		- INFO
+		- cluster nodes
+		- cluster info 

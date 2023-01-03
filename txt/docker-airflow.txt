@@ -1,0 +1,133 @@
+airflow version 
+2.3.3
+
+python version
+3.8.13
+
+compose 파일
+tty: true 무조건 필수 없으면 start가 안됨
+
+centos7.9 기반 airflow 설치 
+- python3.8 필요 패키지 설치
+	1. yum install gcc openssl-devel bzip2-devel libffi-devel make wget which
+	2. wget https://www.python.org/ftp/python/3.8.13/Python-3.8.13.tgz
+	3. tar -xzf Python-3.8.13.tgz
+	4. cd Python-3.8.13
+	5. ./configure --enable-optimizations          - 컴파일 시켜줌
+	6. make altinstall                          - 설치 진행    make 없으면 설치 yum install make
+	7. vi /root/.bashrc							- 환경 변수 설정
+		alias python='/usr/local/bin/python3.8'
+		alias pip='/usr/local/bin/pip3.8'
+	   source /root/.bashrc
+	8. pip install apache-airflow
+		export AIRFLOW_HOME=/opt/airflow
+
+에러 조치
+ModuleNotFoundError: No module named '_sqlite3'' 
+1. sqlite 설치 확인.  3.15 이상이여야 함.
+	- yum install sqlite3 는 3.7버전이 디폴트 값
+	- cd /usr/src
+	- wget --no-check-certificate https://www.sqlite.org/snapshot/sqlite-snapshot-202106031851.tar.gz
+	- tar -xvf sqlite-snapshot-202106031851.tar.gz
+	- cd sqlite-snapshot-202106031851
+	- ./configure
+	- make && make install
+2. python 에서 정상적으로 sqlite 버전이 인식이 되었는지 확인
+	- pip install pysqlite3 
+	- import sqlite3 			sqlite3.sqlite_version
+	- 안되 있을 시
+		- 환경변수 추가 vi ~/.bashrc   	export LD_LIBRARY_PATH="/usr/local/lib"
+		
+python 라이브러리 설치시 sasl 에러
+	yum install cyrus-sasl cyrus-sasl-devel 우분투에 libsasl2-dev 같음
+	yum groupinstall "Development Tools"           --- build-essential 와 같다
+	yum install kernel-devel kernel-headers	---
+	
+	Basics python packages for Apache Airflow
+		pip install -U pip setuptools wheel
+		pip install pytz
+		pip install pyOpenSSL
+		pip install ndg-httpsclient
+
+	
+oracle 연결
+	
+	connection = cx_Oracle.connect(user="nuri11", password="1234", dsn="172.17.0.4/XE")
+	
+	client 에러
+	client 설치
+		https://download.oracle.com/otn_software/linux/instantclient/1916000/oracle-instantclient19.16-basiclite-19.16.0.0.0-1.x86_64.rpm
+		yum install libaio
+		rpm -i oracle-instantclient19.16-basiclite-19.16.0.0.0-1.x86_64.rpm
+	
+	
+	
+mysql 에러
+error: metadata-generation-failed
+
+× Encountered error while generating package metadata.
+╰─> See above for output.
+
+yum install mariadb-devel gcc python38u-devel
+
+pyodbc 에러
+error: legacy-install-failure
+
+× Encountered error while trying to install package.
+╰─> pyodbc
+
+yum install unixODBC-devel
+
+
+airflow 환경설정
+export ADDITIONAL_RUNTIME_APT_COMMAND=""
+export ADDITIONAL_RUNTIME_APT_DEPS=""
+export AIRFLOW_HOME="/opt/airflow"
+export AIRFLOW_INSTALLATION_METHOD=""
+export AIRFLOW_PIP_VERSION="22.1.2"
+export AIRFLOW_UID="50000"
+export AIRFLOW_USER_HOME_DIR="/home/airflow"
+export AIRFLOW_VERSION="2.3.3"
+export AIRFLOW__CORE__LOAD_EXAMPLES="false"
+
+export ADDITIONAL_RUNTIME_APT_COMMAND=""
+export ADDITIONAL_RUNTIME_APT_DEPS=""
+export AIRFLOW_HOME="/opt/airflow"
+export AIRFLOW_INSTALLATION_METHOD=""
+export AIRFLOW_PIP_VERSION="22.1.2"
+export AIRFLOW_UID="50000"
+export AIRFLOW_USER_HOME_DIR="/home/airflow"
+export AIRFLOW_VERSION="2.3.3"
+export AIRFLOW__CORE__LOAD_EXAMPLES="false"
+export BUILD_ID=""
+export COMMIT_SHA=""
+export DEBIAN_FRONTEND="noninteractive"
+export DUMB_INIT_SETSID="1"
+export GPG_KEY="E3FF2839C048B25C084DEBE9B26995E310250568"
+export GUNICORN_CMD_ARGS="--worker-tmp-dir /dev/shm"
+
+HOME="/root"
+HOSTNAME="07b2d35c1201"
+INSTALL_MSSQL_CLIENT="true"
+INSTALL_MYSQL_CLIENT="true"
+INSTALL_POSTGRES_CLIENT="true"
+LANG="C.UTF-8"
+LANGUAGE="C.UTF-8"
+LC_ALL="C.UTF-8"
+LC_CTYPE="C.UTF-8"
+LC_MESSAGES="C.UTF-8"
+OLDPWD
+PATH="/root/bin:/home/airflow/.local/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+PIP_USER="true"
+PS1="\${debian_chroot:+(\$debian_chroot)}\\u@\\h:\\w\\\$ "
+PWD="/opt/airflow"
+PYTHON_BASE_IMAGE="python:3.8-slim-bullseye"
+PYTHON_GET_PIP_SHA256="ba3ab8267d91fd41c58dbce08f76db99f747f716d85ce1865813842bb035524d"
+PYTHON_GET_PIP_URL="https://github.com/pypa/get-pip/raw/6ce3639da143c5d79b44f94b04080abf2531fd6e/public/get-pip.py"
+PYTHON_PIP_VERSION="22.0.4"
+PYTHON_SETUPTOOLS_VERSION="57.5.0"
+PYTHON_VERSION="3.8.13"
+RUNTIME_APT_COMMAND="echo"
+
+
+	

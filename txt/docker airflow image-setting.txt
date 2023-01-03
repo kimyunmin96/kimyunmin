@@ -1,0 +1,87 @@
+docker 설치
+
+-- python 3.8 버전	3.8.13
+docker pull apache/airflow:2.3.3-python3.8
+
+컨테이너 안에서 python hive 패키지 받을때
+1. apt updata & apt upgrade
+
+2. sasl error 로 인해서 필요 패키지 다운
+	- apt-get install libsasl2-dev (root계정에서)
+	- apt install build-essential (root계정에서) - gcc, make 다운해주는 패키지
+
+3. airflow 계정으로 돌아와서 설치
+	- pip install sasl -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+4. apache-hive 다운
+	- pip install apache-airflow-providers-apache-hive  (livy, pig, pinot, spark)
+	- pip install apache-airflow-providers-apache-livy
+	- pip install apache-airflow-providers-apache-pig
+	- pip install apache-airflow-providers-apache-pinot
+	- pip install apache-airflow-providers-apache-spark
+	- oracle : pip install apache-airflow-providers-oracle
+	
+* 그냥 설치만 해줘도 됨.
+5. postgres 설치 - 13	13.7
+	- docker run --name postgres -e POSTGRES_PASSWORD=123qwe -d postgres:13
+	- create database airflow
+	- create user airflow password 'airflow' superuser;
+	- 권한
+		- alter user airflow with superuser;  [createdb, createrole, replication, bypassrls]
+		- DB 소유자 변경 : ALTER DATABASE [DB이름] OWNER TO [유저이름]
+6. redis 설치 - latest	7.0.2
+	- docker run --name redis -it redis:latest
+
+모든 작업컨테이너를 만들었으면 image 로 저장
+	- docker commit save -o 컨테이너이름 레포지토리:태그
+	- ex) docker commit save -o postgres postgres:13
+
+# 7번은 network 따로 사용할려면 사용 compose 할때 필요 없음		
+7. container connect 
+	- docker network create test	[네트워크 생성]
+	- docker network inspect test  [네트워크 상태 확인]
+	- docker network connect <네트워크> <컨터이너>  [네트워크 연결]
+	- 네트워크 통신을 해야함
+		- nuri11@LAPTOP-C0UV23FV:~$ docker exec redis ping postgres		- 	container 간의 통신 확인.
+				OCI runtime exec failed: exec failed: unable to start container process: exec: "ping": executable file not found in $PATH: unknown
+		- 위 에러가 발생시
+			- container에 접속 해서 
+				- apt-get update & apt-get upgrade 후 apt-get install inetutils-ping 설치
+
+
+
+기본 사용자 이름 암호 인증 은 현재 API에 대해 지원됩니다. 이것은 LDAP 로그인을 통해 생성된 사용자 또는 암호를 사용하여 Airflow Metadata DB 내에서 작동합니다.
+airflow.api.auth.backend.basic_auth
+
+
+8. 위에 이미지들 작업을 다했으면
+	- airflow compose.yaml 변경 해준다.
+	- 설치 시작
+		1. mkdir -p ./dags ./logs ./plugins
+		2. echo -e "AIRFLOW_UID=$(id -u)" > .env
+		3. docker-compose up airflow-init
+		4. docker-compose up -d, start
+		
+docker.errors.DockerException: Error while fetching server API version: ('Connection aborted.', PermissionError(13, 'Permission denied'))
+
+requests.exceptions.ConnectionError: ('Connection aborted.', PermissionError(13, 'Permission denied'))
+
+urllib3.exceptions.ProtocolError: ('Connection aborted.', PermissionError(13, 'Permission denied'))
+
+docker 권한 주면 가능해짐
+sudo groupadd docker
+sudo usermod -aG docker $USER
+newgrp docker
+
+- 참고
+sudo chown "$USER":"$USER" /home/"$USER"/.docker -R
+sudo chmod g+rwx "$HOME/.docker" -R
+
+
+# 클라우드에서 내부 아이피 ssh 포워딩
+ - ssh adam@34.64.157.112 -L 9998:10.10.10.111:8080
+ - 				외부 아이피	 포트지정		내부
+ 
+ redis-server ./redis.conf
+ 
+ 127.0.0.1:7000 127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005 127.0.0.1:7006

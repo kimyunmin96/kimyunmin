@@ -1,0 +1,58 @@
+===============================================
+# redis sentinel docker
+===============================================
+* 총 docker-compose 파일
+	- master 1 slave 2 sentinel 3
+* redis conf 파일
+	- redis7001, redis7002, redis7003
+	
+* 필요 이미지 tar 파일
+	- sentinel = image_sentinel.tar
+	- redis = redis-image.tar
+	** 도커 로드
+		- docker load -i image_sentinel.tar
+		- docker load -i redis-image.tar
+
+* 경로
+	- redis 폴더 안에 redis용 docker-compose
+	- sentinel 폴더 안에 sentinel용 docker-compose
+
+** docker-compose 실행시에는 현재 폴더에 docker-compose.yaml 파일이 있어야 한다.
+	*** 명령어
+		- docker-compose up -d 컨테이너를 띄운다 -d 명령어는 백그라운드로 실행
+		- docker-compose down 컨테이너를 다 지운다.
+		- docker-compose stop
+		- docker-compose start
+		- docker-compose restart
+		
+* redis docker-compose 순서
+	- redis 폴더에서 redis compose 파일 먼저 실행 (3개 vm ip) ex) 10.10.10.111, 10.10.10.112, 10.10.10.113
+	- sentinel 폴더에서 sentinel compose 파일 먼저 실행 (3개 vm ip) ex) 10.10.10.111, 10.10.10.112, 10.10.10.113
+	
+* redis 명령어로 connection이 되어있는지 확인
+	*** 명령어
+		- redis-cli -p [포트] 접속 해당 컨테이너를 접속 해서 하면 된다.
+		- 접속 후
+			- info를 사용하면 정보를 알수있다.
+
+* 로그 보는 법
+	- redis log는 각 폴더 안에 logs 폴더 안에서 볼 수 있다.
+	- sentinel log 는 docker 컨테이너 로그를 찍으면 볼 수 있다.
+		- docker logs [컨테이너 이름]
+		
+* redis 파일 
+	- 반입 폴더 1, 2, 3
+* sentinel 파일
+	- 반입 폴더 4, 5, 6
+
+세트 [1, 4] [2, 5] [3, 6]
+
+* ip 가 변경이 되었을 때
+
+*** conf, docker-compose 파일 안에서 변경도 시켜줘야 함.
+	- conf
+		- slaveof, replicaof, replica ip post
+	- docker-compose
+		- master ip 변겅
+	
+	
