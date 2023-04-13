@@ -1,0 +1,12 @@
+==============
+naver cloud
+==============
+ - 계정
+	- id : root
+	- pw : A49Jh8A8=aybq / 123qwe
+	- id : dataiku
+	- pw : 123qwe
+	
+ - docker dataiku
+	192.168.0.38:10000  admin/admin
+	

@@ -1,0 +1,27 @@
+==================
+redisearch(local)
+==================
+https://docs.deistercloud.com/content/Databases.30/Redis/RediSearch.xml?embedded=true
+
+ - 개발 과정
+	- https://github.com/redis/redis-py/commits/master?after=ed38e77050241a84c0108e47254d1804e8640531+244&branch=master&qualified_name=refs%2Fheads%2Fmaster
+
+ - redis cluster (python)
+	- https://github.com/redis/redis-py/commit/9db1eec71b443b8e7e74ff503bae651dc6edf411
+	
+	
+	
+	
+	
+	
+	
+	
+	
+클러스터 모드 지원 x
+https://github.com/redis/redis-py/commit/15dafb1414f05ce24ef336fc539e06ad6a2b3d19
+
+
+===================
+redisearch 벡터 연산
+===================
+https://redis.com/blog/rediscover-redis-for-vector-similarity-search/

@@ -1,0 +1,6 @@
+===================
+mldl
+===================
+
+mecab-python
+	- https://vhrehfdl.tistory.com/129

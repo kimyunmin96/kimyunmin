@@ -1,0 +1,23 @@
+============
+GCP
+============
+
+
+airflow
+	- http://34.64.85.244:8080/
+	- admin/admin
+
+
+postgres
+	- 34.64.39.188 / 5432
+	- DB : postgresdb
+	- User : admin
+	- Passwd : psltest
+
+	- DB : monitor_api
+	- User : monitor_api
+	- Passwd : monitor_api
+
+pgadmin
+	- http://34.64.132.46/ 
+	- chart@domain.com  / SuperSecret

@@ -1,0 +1,13 @@
+=============
+Flask api
+=============
+
+접속 정보
+	- ip : 192.168.0.157
+	- port : 3000
+	
+	- 주요 파일
+		- api 실행 : app.py
+			- python3 app.py &
+		- 공통모듈 db insert : collect.py
+		- 화면 monitor : monitor_api.py

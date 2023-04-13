@@ -1,0 +1,6 @@
+백업공간~ ftp://192.168.0.112:21 (with TLS encrypted transfer, not sftp)  
+   > auser / analysis@
+  로그인하셔서 /002_personal/ 에 개인dir을 만들고 사용하시기 바랍니다.
+
+192.168.0.112
+analysis@

@@ -1,0 +1,6 @@
+RUN apt-get update
+RUN apt-get install -y git
+RUN groupadd -g 999 airflow
+RUN useradd -r -u 999 -g airflow airflow
+
+USER airflow

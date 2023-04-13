@@ -1,0 +1,67 @@
+=================
+사내 airflow (dev) 가상머신
+=================
+사무실내 Airflow 서버 정보입니다.
+해당 서버는 제 자리에 위치한 데스크탑 입니다.
+ 
+-서버 접속 정보
+서버 주소 : 192.168.0.32
+ 
+Window
+계정 정보 : hk.choi  //  qwer1234!! 
+ 
+Ubuntu (SSH) 
+계정 정보 : ubuntu // qwer1234!! (root 비밀번호 동일)
+ 
+ 
+-Airflow 접속 정보
+Web 주소 : http://192.168.0.32:8080/
+계정 정보 : airflow // airflow
+DAG 리파지토리 경로 : /home/airflow/docker/dags
+(* SSH 접속 후 "sudo su airflow" 으로 계정 전환하여 사용)
+
+
+=============
+postgres
+=============
+postgres 접속정보 
+192.168.0.32:5432	airflow/airflow
+
+스키마 
+airflow_monitor : 모니터링 시스템
+airflow : 에어플로우 내부 
+afapp : 모니터링 어플 사용(공공데이터)
+
+==============
+# airflow / postgres  회사 내부 서버
+==============
+
+192.168.0.156
+192.168.0.157 / 22
+root /  postgres
+postgres / postgres
+admusr / nuriggum
+
+
+
+
+
+# airflow 접속정보
+  - url : 192.168.0.156:8080  
+  - id : airflow pw : airflow
+  - 서버
+    - ip : 192.168.0.156 port : 22
+    - id : root pw : P@ssw0rd
+    - id : airflow pw : airflow 
+
+# postgres 접속정보
+  - ip : 192.168.0.157 port : 5432
+  - id : airflow pw : airflow
+  - id : monitor pw : monitor
+  - database 
+    - airflow_monitor : 모니터링 시스템
+    - afapp : 모니터링 어플 사용(공공데이터)
+  - 서버
+    - 192.168.0.157 port : 22
+    - id : root pw : P@ssw0rd
+    - id : postgres pw : postgres

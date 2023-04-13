@@ -1,0 +1,63 @@
+==================
+python oracle 설치
+==================
+apt-get install libaio1 wget vim
+pip install cx_Oracle
+
+이슈 
+	- 오라클 클라이언트 문제
+	- sqlalchemy.exc.DatabaseError: (cx_Oracle.DatabaseError) DPI-1047: Cannot locate a 64-bit Oracle Client library: "libaio.so.1: cannot open shared object file: No such file or directory".
+
+cd /opt
+
+# wget https://download.oracle.com/otn_software/linux/instantclient/219000/instantclient-basic-linux.x64-21.9.0.0.0dbru.zip \ 
+# wget https://download.oracle.com/otn_software/linux/instantclient/219000/instantclient-sqlplus-linux.x64-21.9.0.0.0dbru.zip \ 
+# wget https://download.oracle.com/otn_software/linux/instantclient/219000/instantclient-sdk-linux.x64-21.9.0.0.0dbru.zip \
+wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip
+
+
+# unzip instantclient-basic-linux.x64-21.9.0.0.0dbru.zip \ 
+# unzip instantclient-sqlplus-linux.x64-21.9.0.0.0dbru.zip \ 
+# unzip instantclient-sdk-linux.x64-21.9.0.0.0dbru.zip \ 
+unzip instantclient-basiclite-linuxx64.zip
+
+
+
+# vi /etc/profile 
+ 
+# export OCI_HOME=/opt/oracle/instantclient_21_9
+# export OCI_LIB_DIR=$OCI_HOME
+# export OCI_INCLUDE_DIR=$OCI_HOME/sdk/include
+# export OCI_VERSION=21
+# export LD_LIBRARY_PATH=/opt/oracle/instantclient_21_9:${LD_LIBRARY_PATH}
+# export TNS_ADMIN="/opt/oracle/instantclient_21_9/network/admin"
+ 
+# source /etc/profile
+
+
+vi ~/.bashrc
+
+export OCI_HOME=/opt/oracle/instantclient_21_9
+export OCI_LIB_DIR=$OCI_HOME
+export OCI_INCLUDE_DIR=$OCI_HOME/sdk/include
+export OCI_VERSION=21
+export LD_LIBRARY_PATH=/opt/oracle/instantclient_21_9:${LD_LIBRARY_PATH}
+export TNS_ADMIN="/opt/oracle/instantclient_21_9/network/admin"
+export PATH=/opt/oracle/instantclient_21_9:$PATH
+
+
+source ~/.bashrc
+
+
+echo '/opt/oracle/instantclient_21_9' | sudo tee -a /etc/ld.so.conf.d/oracle_instant_client.conf
+ldconfig
+
+
+
+
+
+
+import pandas as pd
+import sqlalchemy as sa
+engine = sa.create_engine('oracle://TEST:test@192.168.0.157:1521/XE')
+df = pd.read_sql_query(f"select * from MOLDSET_LABELED_CN7", engine)

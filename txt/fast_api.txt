@@ -1,0 +1,57 @@
+/chk_health_list  헬스 체크 수집원 리스트
+
+/chk_healths/{collector_source}  수집원에 따른 상태정보 
+
+poetry run uvicorn main:app --reload --host=0.0.0.0 --port=4000 >> `date +\%Y\%m\%d`_fastapi.log &
+
+### fast api
+	- ip : 192.168.0.157
+	- port : 4000
+
+### 경로
+	- docker 컨테이너 안에  /fast_api
+	- conf 파일 : /fast_api/conf/post_config.ini
+	- main.py : fast api 실행 파일
+	- collect.py : health, error, collection db 접속 모듈 파일
+	- monitor_api.py : 화면에서 보여줄 데이터 처리 모듈 파일
+	- airflow_api.py : 에어플로우 api 정보 모듈 파일
+	
+	
+### health call
+	- 수집기 상태
+		- /health : post
+		- ex) http://192.168.0.157:4000/health
+
+	- 헬스 체크 수집원 리스트 : get 
+		- /chk_health_list
+		- ex) http://192.168.0.157:4000/chk_health_list
+	
+	- 수집원에 따른 상세정보 : get
+		- /chk_healths/{collector_source}
+		- ex) http://192.168.0.157:4000/chk_healths/402
+		
+	
+	- 수집원 차트 채널 선택 목록 : get
+		- /chk_health_chart_list
+		- ex) http://192.168.0.157:4000/chk_health_chart_list
+
+### error
+	- error 메세지 : post 
+		- /error
+		- ex) http://192.168.0.157:4000/error
+		
+	- 데이터 수집 오류 선택 : get
+		- /chk_error_channel
+		- ex) http://192.168.0.157:4000/chk_error_channel
+		
+	- 데이터수집 오류 메세지 : get
+		- /chk_error/{call_error_source}
+		- ex) http://192.168.0.157:4000/chk_error/10
+		- 변수 받기 
+			- http://192.168.0.157:4000/chk_error/10?current=2&start_date=2023-02-14&end_date=2023-02-15
+		
+### collect
+	- 수집건수  : post
+		- /collect
+		- - ex) http://192.168.0.157:4000/collect
+

@@ -1,0 +1,33 @@
+======================
+수집기 health
+======================
+
+- 정보
+	 - 서버 : 192.168.0.156 / 22
+	 - id : airflow 
+	 - pw : airflow
+
+- 경로
+	- 쉘 파일 경로 : /home/airflow/shell
+
+
+
+## 수집기 별 현재 airflow dag (af_collector_pipline_001) 에서 해당 하위폴더에 파일을 만들어줌.
+	
+	- airflow 내부 경로 : /opt/airflow/af_data/collector_log 
+	- airflow 마운트 경로 : /home/airflow/docker/af_data/collector_log
+		- 폴더명
+			- sns
+			- news
+			- internal_data
+			- external_api
+	
+	- 파일 이름 예시 : /opt/airflow/af_data/collector_log/sns/20230209_twitter.txt
+
+- crontab
+	 - health.py : 수집기 별 하위폴더에 파일이 있으면 success 아니면 failed 하고 수집기 별 하위폴더에 back 폴더로 옮김
+	 - health.sh : shell 실행
+	 - 크론탭 명령어를 사용해서 스케줄링 crontab -e 하고 log 파일 생성
+		- ex) */3 * * * * sh /home/airflow/shell/health.sh >> /home/airflow/shell/`date +\%Y\%m\%d`_health.log 2>&1
+	 - log 파일은 날짜별로 관리
+	 

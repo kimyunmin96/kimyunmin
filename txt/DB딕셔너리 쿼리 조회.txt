@@ -1,0 +1,60 @@
+=======================
+DB 딕셔너리
+=======================
+-- mysql, mariadb
+	select * from information_schema.TABLES;
+
+	select COLUMN_NAME, CHARACTER_MAXIMUM_LENGTH , DATA_TYPE , COLUMN_COMMENT  from information_schema.COLUMNS
+	where TABLE_NAME = 'CHARACTER_SETS';	
+	
+	
+
+-- postgresql
+
+ SELECT
+    tbl.schemaname     스키마명
+  , tbl.relname            테이블id
+  , tbl_dec.description  테이블명
+  , col.attname           컬럼명
+  , col.attnum            컬럼순서
+  , col_dec.description 컬럼설명
+  , col_att.data_type    data_type
+  , col_att.character_maximum_length max_len
+  , col_att.is_nullable             null여부
+  , col_att.column_default      default값
+  , col_att.numeric_precision   num_len
+  , col_att.datetime_precision  data_time
+FROM
+    (
+    SELECT
+    *
+    FROM
+          PG_STAT_USER_TABLES  ---  사용자 테이블
+     WHERE
+          1 = 1
+          AND relname = 'code_channel'
+          AND schemaname = 'public') tbl
+LEFT JOIN PG_DESCRIPTION tbl_dec  --- 테이블 정보
+ON
+    tbl_dec.objsubid = 0
+    AND tbl.relid = tbl_dec.objoid
+LEFT JOIN PG_ATTRIBUTE col    --- 컬럼 
+ON
+    tbl.relid = col.ATTRELID
+LEFT JOIN PG_DESCRIPTION col_dec  --- 컬럼 정보
+ON
+    col_dec.objsubid <> 0
+    AND col_dec.objoid  = tbl.relid
+    AND col_dec.objoid = col.attrelid
+    AND col_dec.objsubid = col.attnum
+LEFT JOIN INFORMATION_SCHEMA.COLUMNS col_att  --- data_type 정보
+ON
+    col_att.table_schema = tbl.schemaname
+    AND col_att.table_name = tbl.relname
+    AND col_att.column_name = col.attname
+    AND col_att.ordinal_position = col.attnum
+WHERE
+    1 = 1
+    AND col.attstattarget = '-1'
+ORDER BY
+    tbl.relname, col.attnum;
